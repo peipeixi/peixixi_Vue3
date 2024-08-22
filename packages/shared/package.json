@@ -1,0 +1,11 @@
+{
+    "name": "@myvue/shared",
+    "version": "1.0.0",
+    "module": "dist/shared.esm-bundle.js",
+    "buildOptions": {
+        "formats": [
+            "esm-bundle",
+            "cjs"
+        ]
+    }
+}

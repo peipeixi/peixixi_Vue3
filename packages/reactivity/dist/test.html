@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>reactivity测试</title>
+    </head>
+    <body>
+        <div id="app"></div>
+    </body>
+    <script type="module">
+        //import { reactive, effect } from "/node_modules/@vue/reactivity/dist/reactivity.esm-browser.js";
+        import { reactive } from "/packages/reactivity/dist/reactivity.js";
+
+        const obj = {
+            name: "张三",
+            age: 18,
+            info: {
+                address: "北京",
+            },
+        };
+        const state = reactive(obj);
+        const state1 = reactive(obj);
+        const state2 = reactive(obj);
+        console.log(obj, state, state.name2);
+        console.log(state === state1, state === state2);
+        /*
+        effect(() => {
+            console.log("effect() exe...");
+            app.innerHTML = state.name + state.age + state.info.address;
+        });
+        setTimeout(() => {
+            state.name = "李四";
+            state.age = 20;
+            state.info.address = "上海";
+        }, 3000);
+        */
+    </script>
+</html>
