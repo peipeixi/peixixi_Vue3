@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>effect</title>
+    </head>
+    <body>
+        <div id="app"></div>
+    </body>
+    <script type="module">
+        //import { reactive, effect } from "/node_modules/@vue/reactivity/dist/reactivity.esm-browser.js";
+        import { reactive, effect } from "/packages/reactivity/dist/reactivity.js";
+
+        const obj = {
+            name: "张三",
+            age: 18,
+            gender: "男",
+            info: {
+                address: "北京",
+            },
+            get fullname() {
+                return this.name + this.age;
+            },
+        };
+        const state = reactive(obj);
+
+        /* const _effect = effect(() => {
+            console.log("effect执行了");
+            app.innerHTML = state.name + state.age + state.info.address + state.fullname;
+        }); */
+
+        //effect嵌套调用收集测试
+        const _effect = effect(() => {
+            console.log("effect1执行了");
+            console.log(state.name);
+
+            const f3 = () => {
+                console.log("effect3执行了");
+                console.log(state.gender);
+            };
+
+            const f2 = () => {
+                console.log("effect2执行了");
+                console.log(state.age);
+
+                effect(f3); //f2嵌套f3
+            };
+            effect(f2); //f1嵌套f2
+
+            console.log(state.info.address); //收集f1
+        });
+        state.name; //无需effect
+
+        setTimeout(() => {
+            //state.name = "李四";
+            //state.age = 20;
+            //_effect.run(); //手动执行effect
+            //state.info.address = "上海";
+        }, 3000);
+        /**/
+    </script>
+</html>
