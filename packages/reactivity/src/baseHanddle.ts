@@ -1,5 +1,5 @@
 import { ReactiveFlags } from "./constants";
-import { reactiveEffect } from "./effect";
+import { track, trigger } from "./reactiveEffect";
 
 export const mutableHandler: ProxyHandler<any> = {
     get(target, key, receiver) {
@@ -9,7 +9,7 @@ export const mutableHandler: ProxyHandler<any> = {
         }
 
         //依赖收集，当读取属性时，将当前effect收集到该属性的依赖中，将effect和key一一对应
-        console.log(key, reactiveEffect);
+        track(target, key);
 
         /**
          *  这里使用Reflect的原因是？receiver用于调用目标对象的方法时指定方法中 this 的值从而使this指向的属性也能通过代理代理对象来访问
@@ -34,6 +34,12 @@ export const mutableHandler: ProxyHandler<any> = {
         return Reflect.get(target, key, receiver);
     },
     set(target, key, value, receiver) {
-        return Reflect.set(target, key, value, receiver);
+        const oldValue = target[key];
+        const result = Reflect.set(target, key, value, receiver);
+        if (oldValue !== value) {
+            //属性重新设值，触发更新
+            trigger(target, key, value, oldValue);
+        }
+        return result;
     },
 };
