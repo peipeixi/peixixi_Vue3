@@ -1,4 +1,4 @@
-import { activeEffect, trackEffects, triggerEffects } from "./effect";
+import { activeEffect, trackEffect, triggerEffect } from "./effect";
 
 function createDep(cleanUp, key) {
     const dep = new Map() as any;
@@ -33,7 +33,7 @@ export function track(target, key) {
     }
 
     //保存activeEffect到dep中，key值的改变会触发effect重新执行
-    trackEffects(dep, activeEffect);
+    trackEffect(dep, activeEffect);
     console.log(targetMap);
 }
 
@@ -52,5 +52,5 @@ export function trigger(target, key, newValue, oldValue) {
     }
     const dep = depsMap.get(key);
     if (!dep) return;
-    triggerEffects(dep);
+    triggerEffect(dep);
 }

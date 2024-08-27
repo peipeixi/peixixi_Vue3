@@ -7,6 +7,7 @@
     </head>
     <body>
         <div id="app"></div>
+        <button id="updateStateBtn">更新属性</button>
     </body>
     <script type="module">
         //import { reactive, effect } from "/node_modules/@vue/reactivity/dist/reactivity.esm-browser.js";
@@ -16,6 +17,7 @@
             name: "张三",
             age: 18,
             gender: "男",
+            flag: true,
             info: {
                 address: "北京",
             },
@@ -49,7 +51,7 @@
 
          */
 
-        console.log(obj);
+        /*console.log(obj);
         const _effect = effect(() => {
             console.log("effect执行了");
             //app.innerHTML = state.name + state.age + state.info.address + state.fullname;
@@ -66,6 +68,19 @@
             state.info.address = "上海";
             console.log(obj);
         }, 3000);
-        /**/
+        */
+
+        //effect重复收集，effect无效收集清除
+        const _effect = effect(() => {
+            //根据flag=true时收集name,flag=false时收集age且age不能重复收集
+            app.innerHTML = state.flag ? state.name : state.age + state.age;
+        });
+        effect(() => {
+            console.log(state.name);
+        });
+
+        updateStateBtn.onclick = function updateState() {
+            state.flag = false;
+        };
     </script>
 </html>
