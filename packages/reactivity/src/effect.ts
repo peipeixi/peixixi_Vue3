@@ -27,6 +27,8 @@ class ReactiveEffect {
     deps = []; //记录当前effect被哪些dep依赖收集了，让effect和dep形成双向保存，用于effect中对同一个属性前后两次无效收集的清除
     _depsLength = 0;
 
+    _running = 0; //effect是否正在运行
+
     constructor(public fn, public scheduler) {}
 
     // 执行副作用函数
@@ -36,12 +38,17 @@ class ReactiveEffect {
             // 将当前effect赋值给全局变量,用于依赖收集
             activeEffect = this;
 
+            this._running++; //表示当前effect正在运行
+
             //每次effect执行前需要清理上一次的依赖收集
             preCleanEffect(this);
 
             this.fn();
         } finally {
             postCleanEffect(this); //清理deps列表中_depsLength之后无效的dep
+
+            this._running--; //表示当前effect运行结束
+
             //reactiveEffect = undefined;// 清空全局变量，防止不需要执行effect时,还引用了effect
             activeEffect = lastActiveEffect; // 恢复全局effect变量
         }
@@ -117,7 +124,7 @@ export function trackEffect(dep, effect) {
  */
 export function triggerEffect(dep) {
     for (const effect of dep.keys()) {
-        if (effect.scheduler) {
+        if (!effect._running && effect.scheduler) {
             effect.scheduler(); // 如果有scheduler函数,通过scheduler来执行effect.run()
         }
     }

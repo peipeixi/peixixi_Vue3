@@ -77,12 +77,17 @@
         });
         const runner = effect(
             () => {
-                console.log(state.name);
+                console.log(state.name + "," + state.gender);
+                console.log(state.info.address); //测试递归代理
+                //state.name += "s";//effect中修改属性的值的情况需要判断当前effect是否正在运行，否则会进入死循环
             },
             {
                 //配置用户自定义的option
                 scheduler() {
-                    console.log("state.name更新后不自动渲染，执行我这里的逻辑。。。state.name=", state.name);
+                    console.log(
+                        "state.name更新后不自动渲染，执行我这里的逻辑。。。",
+                        state.name + "," + state.gender
+                    );
                     runner(); //再手动执行effect中的fn方法进行渲染相关操作
                 },
             }
@@ -91,6 +96,8 @@
         updateStateBtn.onclick = function updateState() {
             state.flag = false;
             state.name += "w";
+            state.gender = state.gender === "男" ? "女" : "男";
+            state.info.address += "j";
         };
     </script>
 </html>

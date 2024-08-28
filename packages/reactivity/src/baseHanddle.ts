@@ -1,5 +1,7 @@
+import { isObject } from "@myvue/shared";
 import { ReactiveFlags } from "./constants";
 import { track, trigger } from "./reactiveEffect";
+import { reactive } from "./reactive";
 
 export const mutableHandler: ProxyHandler<any> = {
     get(target, key, receiver) {
@@ -31,7 +33,12 @@ export const mutableHandler: ProxyHandler<any> = {
             get方法如果是return target[key]，fullname中的this指向的是obj，而不是proxy,读取name属性就没有通过代理对象导致更改了name属性的值没有促发更新视图
             get方法如果是return Reflect.get(target,key,receiver)，fullname中的this指向的是receiver，读取name属性也是通过代理对象
         */
-        return Reflect.get(target, key, receiver);
+        const res = Reflect.get(target, key, receiver);
+        if (isObject(res)) {
+            //如果属性对应的值也是对象，则对该对象进行递归代理
+            return reactive(res);
+        }
+        return res;
     },
     set(target, key, value, receiver) {
         const oldValue = target[key];
