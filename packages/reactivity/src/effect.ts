@@ -3,13 +3,19 @@
  * @param fn effect执行的回调函数
  * @param options effect的配置项
  */
-export function effect(fn, options: any = {}) {
+export function effect(fn, options?) {
     const _effect = new ReactiveEffect(fn, () => {
         // scheduler函数。当effect执行时,会调用这个函数,这个函数会执行scheduler
         _effect.run();
     });
     _effect.run(); // 默认执行一次
-    return _effect;
+
+    if (options) {
+        Object.assign(_effect, options); //用户自定义的配置覆盖掉内置的，让用户来决定执行的操作
+    }
+    const runner = _effect.run.bind(_effect);
+    runner.effect = _effect;
+    return runner; //可以让用户自己决定如何执行runner;
 }
 
 export let activeEffect; //当前正在执行的effect，用于在依赖收集时,将当前effect添加到依赖中

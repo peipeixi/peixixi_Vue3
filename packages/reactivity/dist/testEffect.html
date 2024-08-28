@@ -75,12 +75,22 @@
             //根据flag=true时收集name,flag=false时收集age且age不能重复收集
             app.innerHTML = state.flag ? state.name : state.age + state.age;
         });
-        effect(() => {
-            console.log(state.name);
-        });
+        const runner = effect(
+            () => {
+                console.log(state.name);
+            },
+            {
+                //配置用户自定义的option
+                scheduler() {
+                    console.log("state.name更新后不自动渲染，执行我这里的逻辑。。。state.name=", state.name);
+                    runner(); //再手动执行effect中的fn方法进行渲染相关操作
+                },
+            }
+        );
 
         updateStateBtn.onclick = function updateState() {
             state.flag = false;
+            state.name += "w";
         };
     </script>
 </html>
