@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>ref</title>
+    </head>
+    <body>
+        <div id="app"></div>
+        <button id="updateStateBtn">更新属性</button>
+    </body>
+    <script type="module">
+        //import { ref, effect } from "/node_modules/@vue/reactivity/dist/reactivity.esm-browser.js";
+        import { ref, effect } from "/packages/reactivity/dist/reactivity.js";
+
+        const state = ref(false);
+
+        //effect重复收集，effect无效收集清除
+        const _effect = effect(() => {
+            //根据flag=true时收集name,flag=false时收集age且age不能重复收集
+            app.innerHTML = state.value ? "true" : "false";
+        });
+
+        updateStateBtn.onclick = function updateState() {
+            state.value = !state.value;
+        };
+    </script>
+</html>

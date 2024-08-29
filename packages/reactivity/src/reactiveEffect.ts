@@ -1,6 +1,6 @@
 import { activeEffect, trackEffect, triggerEffect } from "./effect";
 
-function createDep(cleanUp, key) {
+export function createDep(cleanUp, key) {
     const dep = new Map() as any;
     dep.cleanUp = cleanUp;
     dep.name = key; //标记该dep对应的key
