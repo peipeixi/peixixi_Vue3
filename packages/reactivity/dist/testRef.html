@@ -10,14 +10,47 @@
         <button id="updateStateBtn">更新属性</button>
     </body>
     <script type="module">
-        //import { ref, effect } from "/node_modules/@vue/reactivity/dist/reactivity.esm-browser.js";
-        import { ref, effect } from "/packages/reactivity/dist/reactivity.js";
+        import {
+            reactive,
+            ref,
+            effect,
+            toRef,
+            toRefs,
+            proxyRefs,
+        } from "/node_modules/@vue/reactivity/dist/reactivity.esm-browser.js"; /**/
+        //import { reactive, ref, effect, toRef, toRefs ,proxyRefs} from "/packages/reactivity/dist/reactivity.js";
+
+        const obj = {
+            name: "张三",
+            age: 18,
+            gender: "男",
+            flag: true,
+            info: {
+                address: "北京",
+            },
+        };
+        const refObj = ref(obj);
+        console.log(refObj.value.name);
+        const stateObj = reactive(obj);
+        const name = toRef(stateObj, "name");
+        console.log(name, name.value);
+
+        const toRefsStateObj = toRefs(stateObj);
+        const { age, gender } = toRefsStateObj;
+        console.log(age.value, gender.value);
 
         const state = ref(false);
 
-        //effect重复收集，effect无效收集清除
+        const proxy_refs = proxyRefs(toRefsStateObj);
+        console.log(proxy_refs, proxy_refs.age);
+        proxy_refs.age = 44;
+        console.log(proxy_refs.age);
+        const proxy_refs_state = proxyRefs(state);
+        console.log(proxy_refs_state, proxy_refs_state.value);
+        proxy_refs_state.value = true;
+        console.log(proxy_refs_state.value);
+
         const _effect = effect(() => {
-            //根据flag=true时收集name,flag=false时收集age且age不能重复收集
             app.innerHTML = state.value ? "true" : "false";
         });
 
