@@ -1,5 +1,5 @@
 import { isObject } from "@myvue/shared";
-import { reactive } from "./reactive";
+import { toReactive } from "./reactive";
 import { activeEffect, trackEffect, triggerEffect } from "./effect";
 import { createDep } from "./reactiveEffect";
 import { ReactiveFlags } from "./constants";
@@ -24,10 +24,8 @@ class RefImpl {
     public dep; //收集对应的effect依赖关系
 
     constructor(public rawValue) {
-        if (isObject(rawValue)) {
-            //对象调用reactive的响应式方式
-            this._value = reactive(rawValue);
-        }
+        this._value = toReactive(rawValue);
+        //对象调用reactive的响应式方式
     }
 
     //获取响应式对象的值，并进行依赖收集
@@ -47,7 +45,7 @@ class RefImpl {
 }
 
 //依赖收集
-function trackRefValue(ref) {
+export function trackRefValue(ref) {
     if (activeEffect) {
         trackEffect((ref.dep = ref.dep || createDep(() => (ref.dep = undefined), undefined)), activeEffect);
         console.log(ref.dep);
@@ -55,7 +53,7 @@ function trackRefValue(ref) {
 }
 
 //派发更新
-function triggerRefValue(ref) {
+export function triggerRefValue(ref) {
     const dep = ref.dep;
     if (dep) {
         triggerEffect(ref.dep);
@@ -82,8 +80,8 @@ class ObjectRefImpl {
 }
 
 /**
- * 将reactive对象中的某个key转成ref对象
- * @param object reactive对象
+ * 将对象中的某个key转成ref对象
+ * @param object 目标对象
  * @param key 对象的key
  */
 export function toRef(object, key) {

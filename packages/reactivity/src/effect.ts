@@ -1,3 +1,5 @@
+import { DirtyLevels } from "./constants";
+
 /**
  * effect函数,用于注册副作用函数,当响应式数据变化时,会重新执行副作用函数
  * @param fn effect执行的回调函数
@@ -22,19 +24,30 @@ export let activeEffect; //当前正在执行的effect，用于在依赖收集�
 /**
  * ReactiveEffect类,用于注册副作用函数
  */
-class ReactiveEffect {
+export class ReactiveEffect {
     _trackId = 0; //记录当前effect被执行的次数，用于防止effect中多次出现的同一个属性被重复收集
     deps = []; //记录当前effect被哪些dep依赖收集了，让effect和dep形成双向保存，用于effect中对同一个属性前后两次无效收集的清除
     _depsLength = 0;
+
+    _dirtyLevel = DirtyLevels.Dirty; //effect的脏值级别，默认为Dirty
 
     _running = 0; //effect是否正在运行
 
     constructor(public fn, public scheduler) {}
 
+    get dirty() {
+        return this._dirtyLevel === DirtyLevels.Dirty;
+    }
+    set dirty(value) {
+        this._dirtyLevel = value ? DirtyLevels.Dirty : DirtyLevels.NotDirty;
+    }
+
     // 执行副作用函数
     run() {
         let lastActiveEffect = activeEffect; //缓存上一次的全局effect,针对effect嵌套的情况
         try {
+            this._dirtyLevel = DirtyLevels.NotDirty; //每次effect执行前,将脏值级别重置为NotDirty，保证后面在计算属性依赖的属性更新之前,读取到缓存的脏值
+
             // 将当前effect赋值给全局变量,用于依赖收集
             activeEffect = this;
 
@@ -43,7 +56,7 @@ class ReactiveEffect {
             //每次effect执行前需要清理上一次的依赖收集
             preCleanEffect(this);
 
-            this.fn();
+            return this.fn();
         } finally {
             postCleanEffect(this); //清理deps列表中_depsLength之后无效的dep
 
@@ -124,6 +137,10 @@ export function trackEffect(dep, effect) {
  */
 export function triggerEffect(dep) {
     for (const effect of dep.keys()) {
+        if (!effect.dirty) {
+            //如果effect的值不是脏值，则将其设为脏值，保证依赖的数据变化后重新计算计算属性的值
+            effect.dirty = true;
+        }
         if (!effect._running && effect.scheduler) {
             effect.scheduler(); // 如果有scheduler函数,通过scheduler来执行effect.run()
         }

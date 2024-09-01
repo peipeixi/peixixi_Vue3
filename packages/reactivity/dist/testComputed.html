@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>计算属性computed</title>
+    </head>
+    <body>
+        <div id="app"></div>
+        <button id="updateStateBtn">更新属性</button>
+    </body>
+    <script type="module">
+        /* import {
+            reactive,
+            ref,
+            effect,
+            computed,
+        } from "/node_modules/@vue/reactivity/dist/reactivity.esm-browser.js"; */
+        import { reactive, ref, effect, computed } from "/packages/reactivity/dist/reactivity.js";
+
+        const obj = {
+            name: "张三",
+            age: 18,
+            gender: "男",
+            flag: true,
+            info: {
+                address: "北京",
+            },
+        };
+
+        const state = ref(false);
+        const reactiveObj = reactive(obj);
+        const computedName = computed(() => {
+            console.log("computed exe...");
+            return reactiveObj.name + " (computedName)";
+        });
+
+        effect(() => {
+            console.log("effect exe...");
+            app.innerHTML = computedName.value;
+            console.log(computedName.value);
+            console.log(computedName.value);
+        });
+
+        updateStateBtn.onclick = function updateState() {
+            //state.value = !state.value;
+            reactiveObj.name = "李四";
+        };
+    </script>
+</html>

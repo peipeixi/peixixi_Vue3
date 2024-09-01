@@ -10,15 +10,15 @@
         <button id="updateStateBtn">更新属性</button>
     </body>
     <script type="module">
-        import {
+        /*import {
             reactive,
             ref,
             effect,
             toRef,
             toRefs,
             proxyRefs,
-        } from "/node_modules/@vue/reactivity/dist/reactivity.esm-browser.js"; /**/
-        //import { reactive, ref, effect, toRef, toRefs ,proxyRefs} from "/packages/reactivity/dist/reactivity.js";
+        } from "/node_modules/@vue/reactivity/dist/reactivity.esm-browser.js"; */
+        import { reactive, ref, effect, toRef, toRefs, proxyRefs } from "/packages/reactivity/dist/reactivity.js";
 
         const obj = {
             name: "张三",
@@ -34,10 +34,12 @@
         const stateObj = reactive(obj);
         const name = toRef(stateObj, "name");
         console.log(name, name.value);
+        const gender = toRef({ gender: "男" }, "gender");
+        console.log("gender=", gender.value);
 
         const toRefsStateObj = toRefs(stateObj);
-        const { age, gender } = toRefsStateObj;
-        console.log(age.value, gender.value);
+        const { age } = toRefsStateObj;
+        console.log("age=", age.value);
 
         const state = ref(false);
 
