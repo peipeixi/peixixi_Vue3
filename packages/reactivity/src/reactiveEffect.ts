@@ -1,4 +1,6 @@
+import { TriggerOpTypes } from "vue";
 import { activeEffect, trackEffect, triggerEffect } from "./effect";
+import { isArray, isIntegerKey, isMap, isSymbol } from "@myvue/shared";
 
 export function createDep(cleanUp, key) {
     const dep = new Map() as any;
@@ -40,17 +42,64 @@ export function track(target, key) {
 /**
  * 触发更新，找到key对应的dep，执行dep中的effect
  * @param target 目标对象
+ * @param type 目标对象被更新的方式
  * @param key 目标对象被更新的key
  * @param newValue key的新值
  * @param oldValue key的旧值
  * @returns
  */
-export function trigger(target, key, newValue, oldValue) {
+export function trigger(target, type, key, newValue, oldValue) {
     const depsMap = targetMap.get(target);
     if (!depsMap) {
         return;
     }
-    const dep = depsMap.get(key);
-    if (!dep) return;
-    triggerEffect(dep);
+    let deps = []; //收集依赖
+
+    if (type === TriggerOpTypes.CLEAR) {
+        //响应式对象被清空
+        deps = [...depsMap.values()];
+    } else if (isArray(target) && key === "length") {
+        //数组长度被修改，触发数组中所有索引大于等于新长度的依赖
+        const newLength = Number(newValue);
+        depsMap.forEach((dep, key) => {
+            if (key === "length" || (!isSymbol(key) && key >= newLength)) {
+                deps.push(dep);
+            }
+        });
+    } else {
+        //触发key对应的依赖
+        if (key !== undefined) {
+            deps.push(depsMap.get(key));
+        }
+        switch (type) {
+            case TriggerOpTypes.ADD:
+                if (!isArray(target)) {
+                    //对象新增属性，触发所有key的依赖deps.push(depsMap.get(ITERATE_KEY))
+                    deps.push(depsMap.get(Symbol("")));
+                    if (isMap(target)) {
+                        deps.push(depsMap.get(Symbol("")));
+                    }
+                } else if (isIntegerKey(key)) {
+                    //数组新增元素
+                    deps.push(depsMap.get("length")); //触发数组长度依赖
+                }
+                break;
+            case TriggerOpTypes.DELETE:
+                if (!isArray(target)) {
+                    //对象删除属性，触发所有key的依赖
+                    deps.push(depsMap.get(Symbol("")));
+                }
+                break;
+            case TriggerOpTypes.SET:
+                if (isMap(target)) {
+                    deps.push(depsMap.get(Symbol("")));
+                }
+                break;
+        }
+        for (const dep of deps) {
+            if (dep) {
+                triggerEffect(dep);
+            }
+        }
+    }
 }

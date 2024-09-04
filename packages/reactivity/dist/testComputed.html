@@ -10,13 +10,13 @@
         <button id="updateStateBtn">更新属性</button>
     </body>
     <script type="module">
-        /* import {
+        import {
             reactive,
             ref,
             effect,
             computed,
-        } from "/node_modules/@vue/reactivity/dist/reactivity.esm-browser.js"; */
-        import { reactive, ref, effect, computed } from "/packages/reactivity/dist/reactivity.js";
+        } from "/node_modules/@vue/reactivity/dist/reactivity.esm-browser.js"; /**/
+        //import { reactive, ref, effect, computed } from "/packages/reactivity/dist/reactivity.js";
 
         const obj = {
             name: "张三",
@@ -27,6 +27,24 @@
                 address: "北京",
             },
         };
+        const arr = [1, 2, 3];
+        const reactiveArr = reactive(arr);
+
+        const map = new Map();
+        map.set("name", "张三");
+        // map.set("age", 18);
+        const reactiveMap = reactive(map);
+
+        const obj1 = {
+            name: "张三",
+            getkey(key) {
+                return this[key];
+            },
+            setkey(key, value) {
+                this[key] = value;
+            },
+        };
+        const reactiveObj1 = reactive(obj1);
 
         const state = ref(false);
         const reactiveObj = reactive(obj);
@@ -41,10 +59,22 @@
             console.log(computedName.value);
             console.log(computedName.value);
         });
+        effect(() => {
+            /* reactiveArr.forEach((element) => {
+                console.log(element);
+            }); */
+            //console.log(reactiveMap.get("name"));
+
+            console.log(reactiveObj1.getkey("name"));
+        });
 
         updateStateBtn.onclick = function updateState() {
             //state.value = !state.value;
-            reactiveObj.name = "李四";
+            //reactiveObj.name = "李四";
+            //reactiveArr[reactiveArr.length] = reactiveArr.length * 3;
+            //reactiveArr.push(reactiveArr.length * 3);
+            //reactiveMap.set("name", "李四");
+            reactiveObj1.setkey("name", "李四");
         };
     </script>
 </html>

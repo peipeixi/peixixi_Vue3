@@ -1,5 +1,5 @@
-import { isObject } from "@myvue/shared";
-import { ReactiveFlags } from "./constants";
+import { hasOwn, isArray, isObject } from "@myvue/shared";
+import { ReactiveFlags, TriggerOpTypes } from "./constants";
 import { track, trigger } from "./reactiveEffect";
 import { reactive } from "./reactive";
 
@@ -42,10 +42,16 @@ export const mutableHandler: ProxyHandler<any> = {
     },
     set(target, key, value, receiver) {
         const oldValue = target[key];
+        let hasKey = isArray(target) ? Number(key) < target.length : hasOwn(target, key);
         const result = Reflect.set(target, key, value, receiver);
         if (oldValue !== value) {
             //属性重新设值，触发更新
-            trigger(target, key, value, oldValue);
+            if (hasKey) {
+                trigger(target, TriggerOpTypes.SET, key, value, oldValue);
+            } else {
+                //新增属性，触发更新
+                trigger(target, TriggerOpTypes.ADD, key, value, oldValue);
+            }
         }
         return result;
     },
