@@ -33,6 +33,8 @@ export class ReactiveEffect {
 
     _running = 0; //effect是否正在运行
 
+    public active = true; //effect是否激活，默认为true
+
     constructor(public fn, public scheduler) {}
 
     get dirty() {
@@ -45,6 +47,9 @@ export class ReactiveEffect {
     // 执行副作用函数
     run() {
         let lastActiveEffect = activeEffect; //缓存上一次的全局effect,针对effect嵌套的情况
+        if (!this.active) {
+            return this.fn(); //如果effect未激活，则直接执行fn函数即可
+        }
         try {
             this._dirtyLevel = DirtyLevels.NotDirty; //每次effect执行前,将脏值级别重置为NotDirty，保证后面在计算属性依赖的属性更新之前,读取到缓存的脏值
 
@@ -64,6 +69,14 @@ export class ReactiveEffect {
 
             //reactiveEffect = undefined;// 清空全局变量，防止不需要执行effect时,还引用了effect
             activeEffect = lastActiveEffect; // 恢复全局effect变量
+        }
+    }
+
+    stop() {
+        if (this.active) {
+            this.active = false;
+            preCleanEffect(this); //清理effect收集的依赖关系
+            postCleanEffect(this); //清理deps列表中_depsLength之后无效的dep
         }
     }
 }

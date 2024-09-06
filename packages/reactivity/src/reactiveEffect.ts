@@ -36,7 +36,6 @@ export function track(target, key) {
 
     //保存activeEffect到dep中，key值的改变会触发effect重新执行
     trackEffect(dep, activeEffect);
-    console.log(targetMap);
 }
 
 /**

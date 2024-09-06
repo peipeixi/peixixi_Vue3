@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>监听属性watch</title>
+    </head>
+    <body>
+        <div id="app"></div>
+        <button id="updateStateBtn">更新属性</button>
+    </body>
+    <script type="module">
+        import {
+            reactive,
+            ref,
+            effect,
+            computed,
+            watch,
+            watchEffect,
+        } from "/node_modules/vue/dist/vue.esm-browser.js";
+
+        /**/
+        //import { reactive, ref, effect, computed, watch, watchEffect } from "/packages/reactivity/dist/reactivity.js";
+
+        const obj = {
+            name: "张三",
+            age: 18,
+            info: {
+                address: "北京",
+            },
+        };
+        const reactiveObj = reactive(obj);
+        const refName = ref("张三ref");
+
+        /* watch(
+            () => reactiveObj.info.address, //reactiveObj,
+            (newVal, oldVal) => {
+                console.log("watch", newVal, oldVal);
+            },
+            {
+                immediate: true,
+                //deep: true,
+            }
+        ); */
+
+        function getData(timer) {
+            return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    resolve(timer);
+                }, timer);
+            });
+        }
+        let timer = 3000;
+        const unWatch = watch(
+            refName,
+            async (newval, oldval, onCleanUp) => {
+                timer -= 1000; //2000  1000
+                let flag = true;
+                onCleanUp(() => {
+                    flag = false;
+                });
+                const res = await getData(timer); //2000  1000
+                if (flag) {
+                    //false true
+                    console.log(res, "newval=", newval);
+                }
+            },
+            {
+                flush: "async",
+            }
+        );
+
+        updateStateBtn.onclick = function updateState() {
+            //unWatch();
+            //reactiveObj.info.address = "长沙";
+            //reactiveObj.name = "haha";
+            // reactiveObj.name = "xixi";
+            refName.value = "李四ref";
+            refName.value = "李四ref111";
+            refName.value = "李四ref222";
+            console.log("-----------");
+            //reactiveArr[reactiveArr.length] = reactiveArr.length * 3;
+            //reactiveArr.push(reactiveArr.length * 3);
+            //reactiveMap.set("name", "李四");
+        };
+    </script>
+</html>
