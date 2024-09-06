@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>nodeOps_patchProp</title>
+        <style>
+            .title {
+                text-decoration: underline;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app"></div>
+    </body>
+    <script type="module">
+        import { createRenderer, render, h } from "/node_modules/@vue/runtime-dom/dist/runtime-dom.esm-browser.js";
+        import { options } from "./runtime-dom.js";
+
+        const vnode = h(
+            "h4",
+            {
+                style: { color: "red", fontSize: "20px" },
+                class: "title",
+                onClick: (e) => {
+                    console.dir(e.target);
+                },
+                title: "标题",
+            },
+            "render......."
+        );
+        createRenderer(options).render(vnode, app);
+    </script>
+</html>

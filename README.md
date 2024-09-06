@@ -10,3 +10,6 @@ node 18.18.0
 "scripts": {
 "dev": "node scripts/dev.js reactivity -f esm",
 },
+
+pnpm 安装 packages 下的其它模块命令（如：activity 模块下安装 shared 模块）：
+pnpm i @myvue/shared@workspace --filter @myvue/reactivity
